@@ -6,7 +6,7 @@ import java.util.Set;
 public record MeResponseDTO(
         Long id,
         String username,
-        Set<String> roles,
+        String roles,
         List<NoteResponseDTO> notes,
         List<TagResponseDTO> tags
 ) {

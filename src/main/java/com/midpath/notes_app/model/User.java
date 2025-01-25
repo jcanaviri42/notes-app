@@ -25,6 +25,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Note> notes = new HashSet<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Tag> tags = new HashSet<>();
+
     // Getters and setters
     public Long getId() {
         return id;
@@ -60,6 +63,14 @@ public class User {
 
     public Set<Note> getNotes() {
         return notes;
+    }
+
+    public Set<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
     }
 
     public void setNotes(Set<Note> notes) {

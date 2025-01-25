@@ -16,6 +16,10 @@ public class Tag {
     @Column(unique = true, length = 50)
     private String name;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @ManyToMany(mappedBy = "tags")
     private Set<Note> notes = new HashSet<>();
 
@@ -34,6 +38,14 @@ public class Tag {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Set<Note> getNotes() {
