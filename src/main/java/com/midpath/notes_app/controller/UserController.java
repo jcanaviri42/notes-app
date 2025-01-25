@@ -3,6 +3,7 @@ package com.midpath.notes_app.controller;
 import com.midpath.notes_app.dto.MeResponseDTO;
 import com.midpath.notes_app.dto.NoteResponseDTO;
 import com.midpath.notes_app.dto.TagResponseDTO;
+import com.midpath.notes_app.model.Note;
 import com.midpath.notes_app.model.User;
 import com.midpath.notes_app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +39,20 @@ public class UserController {
             return ResponseEntity.notFound().build();
 
         List<NoteResponseDTO> noteResponses = user.getNotes().stream()
+                .filter(note -> !note.isArchived())
                 .map(note -> new NoteResponseDTO(
                         note.getId(),
                         note.getTitle(),
-                        note.getContent(),
-                        note.isArchived()))
+                        note.getContent()))
                 .collect(Collectors.toList());
+
+        List<NoteResponseDTO> archiveNotesResponses = user.getNotes().stream()
+                .filter(Note::isArchived)
+                .map(note -> new NoteResponseDTO(
+                        note.getId(),
+                        note.getTitle(),
+                        note.getContent()))
+                .toList();
 
         List<TagResponseDTO> tagResponses = user.getTags().stream()
                 .map(tag -> new TagResponseDTO(
@@ -56,6 +65,7 @@ public class UserController {
                 user.getUsername(),
                 user.getRoles(),
                 noteResponses,
+                archiveNotesResponses,
                 tagResponses
         );
 

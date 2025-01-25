@@ -8,6 +8,7 @@ public record MeResponseDTO(
         String username,
         String roles,
         List<NoteResponseDTO> notes,
+        List<NoteResponseDTO> archivedNotes,
         List<TagResponseDTO> tags
 ) {
 }
