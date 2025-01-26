@@ -50,6 +50,11 @@ src/main/java/com/example/notesapp
 │   └── ...
 └── NotesAppApplication.java # Main application class
 ```
+
+## 🪣 DataBase Schema
+
+![img.png](img.png)
+
 ## 🚀 Build and Run
 
 1.  **Clone the repository:** `git clone https://github.com/jcanaviri42/notes-app.git`
