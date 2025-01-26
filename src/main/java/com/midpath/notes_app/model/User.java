@@ -34,14 +34,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Tag> tags = new HashSet<>();
 
-    public void addNote(Note note) {
-        this.notes.add(note);
-        note.setUser(this);
-    }
-
-    public void removeNote(Note note) {
-        this.notes.remove(note);
-        note.setUser(null);
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserSearchState> searchStates = new HashSet<>();
 
 }

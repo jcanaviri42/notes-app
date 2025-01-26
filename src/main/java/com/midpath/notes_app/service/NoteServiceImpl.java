@@ -5,7 +5,9 @@ import com.midpath.notes_app.model.Tag;
 import com.midpath.notes_app.model.User;
 import com.midpath.notes_app.repository.NoteRepository;
 import com.midpath.notes_app.repository.TagRepository;
+import com.midpath.notes_app.specifications.NoteSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -113,5 +115,14 @@ public class NoteServiceImpl implements NoteService {
         } catch (Exception ignored) {
             return false;
         }
+    }
+
+    @Override
+    public List<Note> searchNotes(String title, String content, List<Long> tagIds, List<String> tagNames, User user) {
+        Specification<Note> spec = NoteSpecifications.buildSpecification(title, content, tagIds, tagNames, user);
+        if (spec != null)
+            return noteRepository.findAll(spec);
+        else
+            return noteRepository.findByUserAndIsArchivedFalse(user);
     }
 }

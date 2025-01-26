@@ -26,4 +26,6 @@ public interface NoteService {
     Boolean archiveNote(Note note);
 
     Boolean restoreNote(Note note);
+
+    List<Note> searchNotes(String title, String content, List<Long> tagIds, List<String> tagNames, User user);
 }
