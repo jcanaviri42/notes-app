@@ -1,5 +1,6 @@
 package com.midpath.notes_app.controller;
 
+import com.midpath.notes_app.dto.AddTagsToNoteRequestDTO;
 import com.midpath.notes_app.dto.NoteResponseDTO;
 import com.midpath.notes_app.dto.TagResponseDTO;
 import com.midpath.notes_app.model.Note;
@@ -151,5 +152,68 @@ public class NoteController {
         } catch (ResponseStatusException ex) {
             return ResponseEntity.status(ex.getStatusCode()).body(ex.getMessage());
         }
+    }
+
+    @PutMapping("/{id}/tags")
+    public ResponseEntity<?> addTagsToNote(
+            @PathVariable Long id,
+            @Valid @RequestBody AddTagsToNoteRequestDTO request) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        try {
+            Note updatedNote = noteService.addTagsToNote(id, request.tagIds(), user);
+            return ResponseEntity.ok(new NoteResponseDTO(
+                            updatedNote.getId(),
+                            updatedNote.getTitle(),
+                            updatedNote.getContent(),
+                            updatedNote.getTags()
+                                    .stream()
+                                    .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
+                                    .toList()
+                    )
+            );
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode()).body(ex.getMessage());
+        }
+    }
+
+    @GetMapping("/tags/{tagId}")
+    public ResponseEntity<List<NoteResponseDTO>> getNotesByTagId(
+            @PathVariable Long tagId) {
+        List<Note> notes = noteService.getNotesByTagId(tagId);
+        List<NoteResponseDTO> noteResponses = notes.stream()
+                .map(note -> new NoteResponseDTO(
+                        note.getId(),
+                        note.getTitle(),
+                        note.getContent(),
+                        note.getTags()
+                                .stream()
+                                .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
+                                .toList()
+                ))
+                .toList();
+        return ResponseEntity.ok(noteResponses);
+    }
+
+    @GetMapping("/tag-name/{tagName}")
+    public ResponseEntity<List<NoteResponseDTO>> getNotesByTagName(@PathVariable String tagName) {
+        List<Note> notes = noteService.getNotesByTagName(tagName);
+        List<NoteResponseDTO> noteResponses = notes.stream()
+                .map(note -> new NoteResponseDTO(
+                        note.getId(),
+                        note.getTitle(),
+                        note.getContent(),
+                        note.getTags()
+                                .stream()
+                                .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
+                                .toList()
+                ))
+                .toList();
+        return ResponseEntity.ok(noteResponses);
     }
 }

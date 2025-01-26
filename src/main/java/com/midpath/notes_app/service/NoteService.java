@@ -16,4 +16,10 @@ public interface NoteService {
     Note updateNote(Long id, Note updatedNote, User user);
 
     void deleteNote(Long id, User user);
+
+    Note addTagsToNote(Long noteId, List<Long> tagIds, User user);
+
+    List<Note> getNotesByTagId(Long tagId);
+
+    List<Note> getNotesByTagName(String tagName);
 }
