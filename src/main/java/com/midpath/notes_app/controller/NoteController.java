@@ -1,6 +1,7 @@
 package com.midpath.notes_app.controller;
 
 import com.midpath.notes_app.dto.AddTagsToNoteRequestDTO;
+import com.midpath.notes_app.dto.ErrorDTO;
 import com.midpath.notes_app.dto.NoteResponseDTO;
 import com.midpath.notes_app.dto.TagResponseDTO;
 import com.midpath.notes_app.model.Note;
@@ -227,5 +228,37 @@ public class NoteController {
                 ))
                 .toList();
         return ResponseEntity.ok(noteResponses);
+    }
+
+    @PatchMapping("/{noteId}/archive")
+    public ResponseEntity<?> archiveNote(@PathVariable Long noteId) {
+        Optional<Note> optionalNote = this.noteService.getNoteById(noteId);
+        if (optionalNote.isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Note not found.");
+
+        Note note = optionalNote.get();
+        Boolean hasBeenArchived = this.noteService.archiveNote(note);
+
+        if (hasBeenArchived)
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity
+                .status(HttpStatus.NOT_IMPLEMENTED)
+                .body(new ErrorDTO("Not modified."));
+    }
+
+    @PatchMapping("/{noteId}/restore")
+    public ResponseEntity<?> restoreNote(@PathVariable Long noteId) {
+        Optional<Note> optionalNote = this.noteService.getNoteById(noteId);
+        if (optionalNote.isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Note not found.");
+
+        Note note = optionalNote.get();
+        Boolean hasBeenRestored = this.noteService.restoreNote(note);
+
+        if (hasBeenRestored)
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity
+                .status(HttpStatus.NOT_IMPLEMENTED)
+                .body(new ErrorDTO("Not modified."));
     }
 }

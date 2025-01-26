@@ -24,7 +24,7 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public List<Note> getAllNotesByUser(User user) {
-        return noteRepository.findByUser(user);
+        return noteRepository.findByUserAndIsArchivedFalse(user);
     }
 
     @Override
@@ -66,7 +66,6 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public Note addTagsToNote(Long noteId, List<Long> tagIds, User user) {
-        System.out.println("START");
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found."));
 
@@ -90,5 +89,29 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public List<Note> getNotesByTagName(String tagName) {
         return noteRepository.findByTagName(tagName);
+    }
+
+    @Override
+    public Boolean archiveNote(Note note) {
+        try {
+            note.setArchived(true);
+            this.noteRepository.save(note);
+
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean restoreNote(Note note) {
+        try {
+            note.setArchived(false);
+            this.noteRepository.save(note);
+
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 }

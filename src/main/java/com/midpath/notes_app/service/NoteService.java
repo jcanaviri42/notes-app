@@ -22,4 +22,8 @@ public interface NoteService {
     List<Note> getNotesByTagId(Long tagId);
 
     List<Note> getNotesByTagName(String tagName);
+
+    Boolean archiveNote(Note note);
+
+    Boolean restoreNote(Note note);
 }
