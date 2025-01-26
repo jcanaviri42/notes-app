@@ -43,15 +43,18 @@ public class UserController {
                 .map(note -> new NoteResponseDTO(
                         note.getId(),
                         note.getTitle(),
-                        note.getContent()))
-                .collect(Collectors.toList());
+                        note.getContent(),
+                        note.getTags().stream().map(tag -> new TagResponseDTO(tag.getId(), tag.getName())).toList()
+                )).collect(Collectors.toList());
 
         List<NoteResponseDTO> archiveNotesResponses = user.getNotes().stream()
                 .filter(Note::isArchived)
                 .map(note -> new NoteResponseDTO(
                         note.getId(),
                         note.getTitle(),
-                        note.getContent()))
+                        note.getContent(),
+                        note.getTags().stream().map(tag -> new TagResponseDTO(tag.getId(), tag.getName())).toList()
+                ))
                 .toList();
 
         List<TagResponseDTO> tagResponses = user.getTags().stream()

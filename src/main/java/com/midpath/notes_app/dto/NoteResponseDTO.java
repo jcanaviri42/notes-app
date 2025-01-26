@@ -1,8 +1,11 @@
 package com.midpath.notes_app.dto;
 
+import java.util.List;
+
 public record NoteResponseDTO(
         Long id,
         String title,
-        String content
+        String content,
+        List<TagResponseDTO> tags
 ) {
 }

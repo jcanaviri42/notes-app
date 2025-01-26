@@ -1,37 +1,155 @@
 package com.midpath.notes_app.controller;
 
+import com.midpath.notes_app.dto.NoteResponseDTO;
+import com.midpath.notes_app.dto.TagResponseDTO;
 import com.midpath.notes_app.model.Note;
+import com.midpath.notes_app.model.User;
+import com.midpath.notes_app.repository.UserRepository;
 import com.midpath.notes_app.service.NoteService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/notes")
 @SuppressWarnings("unused")
 public class NoteController {
 
-    private final NoteService noteService;
-
-    public NoteController(NoteService noteService) {
-        this.noteService = noteService;
-    }
+    @Autowired
+    private NoteService noteService;
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping
-    public List<Note> getAllNotes() {
-        return noteService.getAllNotes();
+    public ResponseEntity<List<NoteResponseDTO>> getAllNotes() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        List<NoteResponseDTO> noteResponses = noteService.getAllNotesByUser(user)
+                .stream()
+                .map(note -> new NoteResponseDTO(
+                        note.getId(),
+                        note.getTitle(),
+                        note.getContent(),
+                        note.getTags()
+                                .stream()
+                                .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
+                                .toList())
+                ).toList();
+
+        return ResponseEntity.ok(noteResponses);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getNoteById(@PathVariable Long id) {
+        try {
+            Optional<Note> noteOptional = noteService.getNoteById(id);
+            if (noteOptional.isPresent()) {
+                Note note = noteOptional.get();
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                if (authentication == null || !authentication.isAuthenticated()) {
+                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                }
+                String username = authentication.getName();
+                User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                if (!note.getUser().equals(user)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No tienes permiso para ver esta nota");
+                }
+                return ResponseEntity.ok(new NoteResponseDTO(
+                                note.getId(),
+                                note.getTitle(),
+                                note.getContent(),
+                                note.getTags()
+                                        .stream()
+                                        .map(tag -> new TagResponseDTO(tag.getId(), tag.getName())).toList()
+                        )
+                );
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Note not found.");
+            }
+
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode()).body(ex.getMessage());
+        }
     }
 
     @PostMapping
-    public Note createNote(@RequestBody Note note) {
-        return noteService.createNote(note);
+    public ResponseEntity<?> createNote(@Valid @RequestBody Note note) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        try {
+            Note createdNote = noteService.createNote(note, user);
+            return new ResponseEntity<>(new NoteResponseDTO(
+                    createdNote.getId(),
+                    createdNote.getTitle(),
+                    createdNote.getContent(),
+                    createdNote.getTags()
+                            .stream()
+                            .map(tag -> new TagResponseDTO(tag.getId(), tag.getName())).toList()
+            ), HttpStatus.CREATED);
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode()).body(ex.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateNote(
+            @PathVariable Long id,
+            @Valid @RequestBody Note updatedNote) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+
+        try {
+            Note updated = noteService.updateNote(id, updatedNote, user);
+            return ResponseEntity.ok(new NoteResponseDTO(
+                            updated.getId(),
+                            updated.getTitle(),
+                            updated.getContent(),
+                            updated.getTags()
+                                    .stream()
+                                    .map(tag -> new TagResponseDTO(tag.getId(), tag.getName())).toList()
+                    )
+            );
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode()).body(ex.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteNoteById(@PathVariable Long id) {
-        noteService.deleteNoteById(id);
-        return ResponseEntity.noContent().build();
-    }
+    public ResponseEntity<?> deleteNote(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
+        try {
+            noteService.deleteNote(id, user);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Correct return for DELETE
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode()).body(ex.getMessage());
+        }
+    }
 }

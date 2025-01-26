@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@SuppressWarnings("unused")
 public class TagServiceImpl implements TagService {
 
     @Autowired
@@ -61,7 +62,6 @@ public class TagServiceImpl implements TagService {
                     }
                     tagRepository.delete(tag);
                     return null;
-                })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Etiqueta no encontrada"));
+                });
     }
 }

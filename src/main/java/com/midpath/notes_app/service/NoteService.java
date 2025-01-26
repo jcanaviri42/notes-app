@@ -1,29 +1,19 @@
 package com.midpath.notes_app.service;
 
 import com.midpath.notes_app.model.Note;
-import com.midpath.notes_app.repository.NoteRepository;
-import org.springframework.stereotype.Service;
+import com.midpath.notes_app.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
-@Service
-public class NoteService {
+public interface NoteService {
+    List<Note> getAllNotesByUser(User user);
 
-    private final NoteRepository noteRepository;
+    Optional<Note> getNoteById(Long id);
 
-    public NoteService(NoteRepository noteRepository) {
-        this.noteRepository = noteRepository;
-    }
+    Note createNote(Note note, User user);
 
-    public List<Note> getAllNotes() {
-        return noteRepository.findAll();
-    }
+    Note updateNote(Long id, Note updatedNote, User user);
 
-    public Note createNote(Note note) {
-        return noteRepository.save(note);
-    }
-
-    public void deleteNoteById(Long id) {
-        noteRepository.deleteById(id);
-    }
+    void deleteNote(Long id, User user);
 }

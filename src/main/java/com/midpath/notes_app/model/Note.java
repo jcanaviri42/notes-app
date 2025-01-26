@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,7 +24,7 @@ public class Note {
     @Column(length = 100)
     private String title;
 
-    @Column(columnDefinition = "TEXT") // Important for TEXT type
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,6 +34,10 @@ public class Note {
     @Column(name = "is_archived")
     private boolean isArchived = false;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
     @ManyToMany
     @JoinTable(
             name = "note_tags",
@@ -39,14 +45,4 @@ public class Note {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tags = new HashSet<>();
-
-    public void addTag(Tag tag) {
-        this.tags.add(tag);
-        tag.getNotes().add(this);
-    }
-
-    public void removeTag(Tag tag) {
-        this.tags.remove(tag);
-        tag.getNotes().remove(this);
-    }
 }
