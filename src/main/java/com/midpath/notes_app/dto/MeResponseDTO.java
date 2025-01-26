@@ -1,7 +1,6 @@
 package com.midpath.notes_app.dto;
 
 import java.util.List;
-import java.util.Set;
 
 public record MeResponseDTO(
         Long id,
@@ -10,5 +9,5 @@ public record MeResponseDTO(
         List<NoteResponseDTO> notes,
         List<NoteResponseDTO> archivedNotes,
         List<TagResponseDTO> tags
-) {
+) implements ResponseDTO {
 }

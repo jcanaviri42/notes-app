@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("unused")
 public class UserInfoDetails implements UserDetails {
 
     private final String username; // Changed from 'name' to 'username' for clarity

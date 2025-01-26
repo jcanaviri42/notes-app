@@ -13,6 +13,10 @@ import java.util.List;
 public interface NoteRepository extends JpaRepository<Note, Long> {
     List<Note> findByUser(User user);
 
+    List<Note> findByUserAndIsArchivedTrue(User user);
+
+    List<Note> findByUserAndIsArchivedFalse(User user);
+
     @Query("SELECT n FROM Note n JOIN n.tags t WHERE t.id = :tagId")
     List<Note> findByTagId(@Param("tagId") Long tagId);
 
