@@ -7,5 +7,5 @@ public record NoteResponseDTO(
         String title,
         String content,
         List<TagResponseDTO> tags
-) {
+) implements ResponseDTO {
 }

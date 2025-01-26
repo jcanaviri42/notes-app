@@ -42,15 +42,14 @@ public class NoteServiceImpl implements NoteService {
     public Note updateNote(Long id, Note updatedNote, User user) {
         return noteRepository.findById(id)
                 .map(note -> {
-                    if (!note.getUser().equals(user)) {
-                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso para modificar esta nota");
-                    }
-                    note.setTitle(updatedNote.getTitle());
-                    note.setContent(updatedNote.getContent());
-                    note.setArchived(updatedNote.isArchived());
+                    if (!note.getUser().equals(user))
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update.");
+
+                    if (updatedNote.getTitle() != null) note.setTitle(updatedNote.getTitle());
+                    if (updatedNote.getContent() != null) note.setContent(updatedNote.getContent());
                     return noteRepository.save(note);
                 })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nota no encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found."));
     }
 
     @Override
@@ -58,7 +57,7 @@ public class NoteServiceImpl implements NoteService {
         noteRepository.findById(id)
                 .map(note -> {
                     if (!note.getUser().equals(user)) {
-                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso para eliminar esta nota");
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete.");
                     }
                     noteRepository.delete(note);
                     return null;
@@ -67,16 +66,16 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public Note addTagsToNote(Long noteId, List<Long> tagIds, User user) {
+        System.out.println("START");
         Note note = noteRepository.findById(noteId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nota no encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found."));
 
-        if (!note.getUser().equals(user)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso para modificar esta nota");
-        }
+        if (!note.getUser().equals(user))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update.");
 
         for (Long tagId : tagIds) {
             Tag tag = tagRepository.findById(tagId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Etiqueta con ID " + tagId + " no encontrada"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found."));
             note.getTags().add(tag);
         }
 

@@ -31,7 +31,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public Tag createTag(Tag tag, User user) {
         if (tagRepository.findByNameAndUser(tag.getName(), user).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una etiqueta con ese nombre para este usuario");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Already exists.");
         }
         tag.setUser(user);
         return tagRepository.save(tag);
@@ -41,16 +41,18 @@ public class TagServiceImpl implements TagService {
     public Tag updateTag(Long id, Tag updatedTag, User user) {
         return tagRepository.findById(id)
                 .map(tag -> {
-                    if (!tag.getUser().equals(user)) {
-                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso para modificar esta etiqueta");
-                    }
-                    if (!tag.getName().equals(updatedTag.getName()) && tagRepository.findByNameAndUser(updatedTag.getName(), user).isPresent()) {
-                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una etiqueta con ese nombre para este usuario");
-                    }
-                    tag.setName(updatedTag.getName());
+                    if (!tag.getUser().equals(user))
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update.");
+
+                    if (!tag.getName().equals(updatedTag.getName()) &&
+                            tagRepository.findByNameAndUser(updatedTag.getName(), user).isPresent())
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Already exists.");
+
+                    if (updatedTag.getName() != null)
+                        tag.setName(updatedTag.getName());
                     return tagRepository.save(tag);
                 })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Etiqueta no encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found."));
     }
 
     @Override
@@ -58,7 +60,7 @@ public class TagServiceImpl implements TagService {
         tagRepository.findById(id)
                 .map(tag -> {
                     if (!tag.getUser().equals(user)) {
-                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso para eliminar esta etiqueta");
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete the tag.");
                     }
                     tagRepository.delete(tag);
                     return null;

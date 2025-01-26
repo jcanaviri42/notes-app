@@ -1,5 +1,6 @@
 package com.midpath.notes_app.controller;
 
+import com.midpath.notes_app.dto.ErrorDTO;
 import com.midpath.notes_app.dto.TagResponseDTO;
 import com.midpath.notes_app.model.Tag;
 import com.midpath.notes_app.model.User;
@@ -29,77 +30,85 @@ public class TagController {
     @GetMapping
     public ResponseEntity<List<TagResponseDTO>> getAllTags() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null || !authentication.isAuthenticated())
             return ResponseEntity.status(401).build();
-        }
+
         String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-        return ResponseEntity.ok(
-                tagService
-                        .getAllTags(user)
-                        .stream()
-                        .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
-                        .toList()
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found."));
+
+        return ResponseEntity.ok(tagService.getAllTags(user)
+                .stream()
+                .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
+                .toList()
         );
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TagResponseDTO> getTagById(@PathVariable Long id) {
-        return tagService
-                .getTagById(id)
+        return tagService.getTagById(id)
                 .map(tag -> ResponseEntity
                         .ok(new TagResponseDTO(tag.getId(), tag.getName())))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Etiqueta no encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found."));
     }
 
     @PostMapping
-    public ResponseEntity<TagResponseDTO> createTag(@Valid @RequestBody Tag tag) {
+    public ResponseEntity<?> createTag(@Valid @RequestBody Tag tag) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null || !authentication.isAuthenticated())
             return ResponseEntity.status(401).build();
-        }
+
         String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-        Tag newTag = tagService.createTag(tag, user);
-        return new ResponseEntity<>(new TagResponseDTO(newTag.getId(), newTag.getName()), HttpStatus.CREATED);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+
+        try {
+            Tag newTag = tagService.createTag(tag, user);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new TagResponseDTO(newTag.getId(), newTag.getName()));
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity
+                    .status(ex.getStatusCode().value())
+                    .body(new ErrorDTO(ex.getReason()));
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTag(@PathVariable Long id, @Valid @RequestBody Tag updatedTag) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null || !authentication.isAuthenticated())
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+
         String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
 
         try {
             Tag updated = tagService.updateTag(id, updatedTag, user);
             return ResponseEntity.ok(new TagResponseDTO(updated.getId(), updated.getName()));
         } catch (ResponseStatusException ex) {
-            return ResponseEntity.status(ex.getStatusCode()).body(ex.getMessage());
+            return ResponseEntity.status(ex.getStatusCode().value()).body(ex.getReason());
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTag(@PathVariable Long id) {
+    public ResponseEntity<?> deleteTag(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null || !authentication.isAuthenticated())
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+
         String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
 
         try {
             tagService.deleteTag(id, user);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (ResponseStatusException ex) {
-            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Etiqueta no encontrada");
-            } else if (ex.getStatusCode() == HttpStatus.FORBIDDEN) {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
-            throw ex;
+            return ResponseEntity.status(ex.getStatusCode().value()).body(ex.getReason());
         }
     }
 }
