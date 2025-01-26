@@ -149,7 +149,3 @@ JPA Specifications: Used for dynamic and complex search queries.
 
 RESTful Principles: The API follows RESTful principles, using standard HTTP
 methods and status codes.
-
-## 🤔 Further Improvements
-* Add pagination to the note retrieval endpoints.
-* Add integration tests.
