@@ -30,6 +30,11 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
+    public List<Note> getAllArchivedNotesByUser(User user) {
+        return noteRepository.findByUserAndIsArchivedTrue(user);
+    }
+
+    @Override
     public Optional<Note> getNoteById(Long id) {
         return noteRepository.findById(id);
     }

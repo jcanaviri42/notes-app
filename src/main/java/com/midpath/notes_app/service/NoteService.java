@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface NoteService {
     List<Note> getAllNotesByUser(User user);
 
+    List<Note> getAllArchivedNotesByUser(User user);
+
     Optional<Note> getNoteById(Long id);
 
     Note createNote(Note note, User user);

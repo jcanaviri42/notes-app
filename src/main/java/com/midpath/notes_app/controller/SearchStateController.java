@@ -38,9 +38,10 @@ public class SearchStateController {
 
     /**
      * Makes an advanced search by the fields in request.
-     * @param title to look by the title.
-     * @param content look by the content.
-     * @param tagIds to look by the tagIds.
+     *
+     * @param title    to look by the title.
+     * @param content  look by the content.
+     * @param tagIds   to look by the tagIds.
      * @param tagNames to look by the tagNames.
      * @return A list with the notes found.
      */
@@ -75,13 +76,17 @@ public class SearchStateController {
                                 .toList()))
                 .toList();
 
-        userSearchStateService.saveState(user, title, content, tagIds, tagNames);
+        try {
+            userSearchStateService.saveState(user, title, content, tagIds, tagNames);
+        } catch (Exception ignored) {
+        }
 
         return ResponseEntity.ok(noteResponses);
     }
 
     /**
      * Retrieves the search history of the user.
+     *
      * @return the search history of the user.
      */
     @GetMapping("/user/search-state")
@@ -107,6 +112,7 @@ public class SearchStateController {
 
     /**
      * Deletes the search history of a user.
+     *
      * @return A no content response.
      */
     @DeleteMapping("/user/search-state")

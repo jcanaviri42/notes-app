@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class NoteSpecifications {
     public static Specification<Note> hasTitle(String title) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("title"), "%" + title + "%");

@@ -21,7 +21,9 @@ public class UserSearchStateServiceImp implements UserSearchStateService {
         try {
             var state = new UserSearchState();
             state.setUser(user);
-            if (title != null) state.setTitleFilter(title);
+            if (title != null) {
+                state.setTitleFilter(title);
+            }
             if (content != null) state.setContentFilter(content);
             if (tagIds != null) state.setTagIdsFilter(tagIds);
             if (tagNames != null) state.setTagNames(tagNames);

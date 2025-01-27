@@ -8,7 +8,6 @@ import com.midpath.notes_app.model.Note;
 import com.midpath.notes_app.model.User;
 import com.midpath.notes_app.repository.UserRepository;
 import com.midpath.notes_app.service.NoteService;
-import jakarta.persistence.Cacheable;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +32,7 @@ public class NoteController {
 
     /**
      * Endpoint that returns all the notes by user.
+     *
      * @return A list that contains all the notes by user, could be empty.
      */
     @GetMapping
@@ -62,7 +62,39 @@ public class NoteController {
     }
 
     /**
+     * Endpoint that returns all the archived notes by user.
+     *
+     * @return A list that contains all the archived notes by user, could be empty.
+     */
+    @GetMapping("/archived")
+    public ResponseEntity<List<NoteResponseDTO>> getAllArchivedNotes() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated())
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+
+        List<NoteResponseDTO> noteResponses = noteService.getAllArchivedNotesByUser(user)
+                .stream()
+                .map(note -> new NoteResponseDTO(
+                        note.getId(),
+                        note.getTitle(),
+                        note.getContent(),
+                        note.getCreatedAt(),
+                        note.getUpdatedAt(),
+                        note.getTags()
+                                .stream()
+                                .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
+                                .toList())
+                ).toList();
+
+        return ResponseEntity.ok(noteResponses);
+    }
+
+    /**
      * Endpoint to get a single note.
+     *
      * @param id The id of the note we want to get.
      * @return Response entity, the note we want or not found message.
      */
@@ -107,6 +139,7 @@ public class NoteController {
 
     /**
      * Endpoint to create a new note.
+     *
      * @param note A new note to create.
      * @return NoteResponseDTO with the new note created or an error message.
      */
@@ -138,7 +171,8 @@ public class NoteController {
 
     /**
      * Updates the content of a single note.
-     * @param id the id of a note.
+     *
+     * @param id          the id of a note.
      * @param updatedNote Note object to change the values
      * @return Response entity, updated note or an error.
      */
@@ -174,6 +208,7 @@ public class NoteController {
 
     /**
      * Deletes a note by its id.
+     *
      * @param id An id of a note.
      * @return Response no content if everything is OK, otherwise an error.
      */
@@ -199,7 +234,8 @@ public class NoteController {
 
     /**
      * Add tags to a note by its id.
-     * @param id the id of a single note.
+     *
+     * @param id      the id of a single note.
      * @param request An instance of AddTagsToNoteRequestDTO(List of tagIds).
      * @return The updated note.
      */
@@ -239,6 +275,7 @@ public class NoteController {
 
     /**
      * Return all the user notes by its tagId.
+     *
      * @param tagId the tagId we want to retrieve.
      * @return A list with the notes founded.
      */
@@ -264,6 +301,7 @@ public class NoteController {
 
     /**
      * Return all the notes by the tagName.
+     *
      * @param tagName The name to look for.
      * @return a list with all the notes founded.
      */
@@ -288,6 +326,7 @@ public class NoteController {
 
     /**
      * This method archives a note.
+     *
      * @param noteId the id of a note.
      * @return Response Entity with no content.
      */
@@ -309,6 +348,7 @@ public class NoteController {
 
     /**
      * Restores a note that is archived.
+     *
      * @param noteId the id of a note
      * @return Response entity with no content.
      */

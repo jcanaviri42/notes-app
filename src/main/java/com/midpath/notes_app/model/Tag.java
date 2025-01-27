@@ -25,7 +25,7 @@ public class Tag {
 
     @NotBlank(message = "The tag name cannot be empty.")
     @Size(max = 50, message = "The tag name cannot be greater than 50 characters.")
-    @Column(unique = true, length = 50)
+    @Column(length = 50)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
