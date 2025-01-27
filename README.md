@@ -140,6 +140,13 @@ with appropriate HTTP status codes (e.g., 400 Bad Request, 404 Not Found, 403 Fo
 Security
 The API uses JWT (JSON Web Tokens) for authentication. All protected endpoints require a valid JWT in the Authorization header (Bearer token).
 
+## 👽 Watch the endpoints at the swagger integration
+To see the swagger integration go to the following pages
+
+
+* [swagger-ui](http://localhost:8080/api/swagger-ui/index.html)
+* [api-docs](http://localhost:8080/api/v3/api-docs)
+
 ## 🎨 Design Decisions
 DTOs: Data Transfer Objects are used to decouple the API from the internal entities, providing a more stable API contract.
 
