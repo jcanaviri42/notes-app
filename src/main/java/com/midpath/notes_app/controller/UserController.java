@@ -1,6 +1,7 @@
 package com.midpath.notes_app.controller;
 
 import com.midpath.notes_app.dto.*;
+import com.midpath.notes_app.mappers.NoteMapper;
 import com.midpath.notes_app.model.User;
 import com.midpath.notes_app.repository.UserRepository;
 import com.midpath.notes_app.service.UserService;
@@ -48,40 +49,10 @@ public class UserController {
                     user.getUsername(),
                     user.getRoles(),
                     this.userService.getNotesByUser(user)
-                            .stream()
-                            .map(note ->
-                                    new NoteResponseDTO(
-                                            note.getId(),
-                                            note.getTitle(),
-                                            note.getContent(),
-                                            note.getCreatedAt(),
-                                            note.getUpdatedAt(),
-                                            note.getTags()
-                                                    .stream()
-                                                    .map(tag -> new TagResponseDTO(
-                                                            tag.getId(),
-                                                            tag.getName())).toList()))
-                            .toList(),
+                            .stream().map(NoteMapper::mapToNoteResponseDTO).toList(),
                     this.userService.getArchivedNotesByUser(user)
-                            .stream()
-                            .map(note ->
-                                    new NoteResponseDTO(
-                                            note.getId(),
-                                            note.getTitle(),
-                                            note.getContent(),
-                                            note.getCreatedAt(),
-                                            note.getUpdatedAt(),
-                                            note.getTags()
-                                                    .stream()
-                                                    .map(tag -> new TagResponseDTO(
-                                                            tag.getId(),
-                                                            tag.getName())).toList()))
-                            .toList(),
-                    user.getTags().stream()
-                            .map(tag -> new TagResponseDTO(
-                                    tag.getId(),
-                                    tag.getName()))
-                            .toList()
+                            .stream().map(NoteMapper::mapToNoteResponseDTO).toList(),
+                    user.getTags().stream().map(tag -> new TagResponseDTO(tag.getId(), tag.getName())).toList()
             );
 
             return ResponseEntity.ok(meResponseDTO);
