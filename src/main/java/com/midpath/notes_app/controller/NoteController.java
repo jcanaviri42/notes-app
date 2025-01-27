@@ -3,7 +3,7 @@ package com.midpath.notes_app.controller;
 import com.midpath.notes_app.dto.AddTagsToNoteRequestDTO;
 import com.midpath.notes_app.dto.ErrorDTO;
 import com.midpath.notes_app.dto.NoteResponseDTO;
-import com.midpath.notes_app.dto.TagResponseDTO;
+import com.midpath.notes_app.mappers.NoteMapper;
 import com.midpath.notes_app.model.Note;
 import com.midpath.notes_app.model.User;
 import com.midpath.notes_app.repository.UserRepository;
@@ -44,19 +44,8 @@ public class NoteController {
         String username = authentication.getName();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
 
-        List<NoteResponseDTO> noteResponses = noteService.getAllNotesByUser(user)
-                .stream()
-                .map(note -> new NoteResponseDTO(
-                        note.getId(),
-                        note.getTitle(),
-                        note.getContent(),
-                        note.getCreatedAt(),
-                        note.getUpdatedAt(),
-                        note.getTags()
-                                .stream()
-                                .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
-                                .toList())
-                ).toList();
+        List<NoteResponseDTO> noteResponses = noteService
+                .getAllNotesByUser(user).stream().map(NoteMapper::mapToNoteResponseDTO).toList();
 
         return ResponseEntity.ok(noteResponses);
     }
@@ -75,19 +64,8 @@ public class NoteController {
         String username = authentication.getName();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
 
-        List<NoteResponseDTO> noteResponses = noteService.getAllArchivedNotesByUser(user)
-                .stream()
-                .map(note -> new NoteResponseDTO(
-                        note.getId(),
-                        note.getTitle(),
-                        note.getContent(),
-                        note.getCreatedAt(),
-                        note.getUpdatedAt(),
-                        note.getTags()
-                                .stream()
-                                .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
-                                .toList())
-                ).toList();
+        List<NoteResponseDTO> noteResponses = noteService
+                .getAllArchivedNotesByUser(user).stream().map(NoteMapper::mapToNoteResponseDTO).toList();
 
         return ResponseEntity.ok(noteResponses);
     }
@@ -113,21 +91,9 @@ public class NoteController {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
                 if (!note.getUser().equals(user))
-                    return ResponseEntity
-                            .status(HttpStatus.FORBIDDEN)
-                            .body("Cannot see.");
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Cannot see.");
 
-                return ResponseEntity.ok(new NoteResponseDTO(
-                                note.getId(),
-                                note.getTitle(),
-                                note.getContent(),
-                                note.getUpdatedAt(),
-                                note.getCreatedAt(),
-                                note.getTags()
-                                        .stream()
-                                        .map(tag -> new TagResponseDTO(tag.getId(), tag.getName())).toList()
-                        )
-                );
+                return ResponseEntity.ok(NoteMapper.mapToNoteResponseDTO(note));
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Note not found.");
             }
@@ -154,16 +120,7 @@ public class NoteController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
         try {
             Note createdNote = noteService.createNote(note, user);
-            return new ResponseEntity<>(new NoteResponseDTO(
-                    createdNote.getId(),
-                    createdNote.getTitle(),
-                    createdNote.getContent(),
-                    createdNote.getCreatedAt(),
-                    createdNote.getUpdatedAt(),
-                    createdNote.getTags()
-                            .stream()
-                            .map(tag -> new TagResponseDTO(tag.getId(), tag.getName())).toList()
-            ), HttpStatus.CREATED);
+            return new ResponseEntity<>(NoteMapper.mapToNoteResponseDTO(createdNote), HttpStatus.CREATED);
         } catch (ResponseStatusException ex) {
             return ResponseEntity.status(ex.getStatusCode().value()).body(ex.getReason());
         }
@@ -190,17 +147,7 @@ public class NoteController {
 
         try {
             Note updated = noteService.updateNote(id, updatedNote, user);
-            return ResponseEntity.ok(new NoteResponseDTO(
-                            updated.getId(),
-                            updated.getTitle(),
-                            updated.getContent(),
-                            updated.getCreatedAt(),
-                            updated.getUpdatedAt(),
-                            updated.getTags()
-                                    .stream()
-                                    .map(tag -> new TagResponseDTO(tag.getId(), tag.getName())).toList()
-                    )
-            );
+            return ResponseEntity.ok(NoteMapper.mapToNoteResponseDTO(updated));
         } catch (ResponseStatusException ex) {
             return ResponseEntity.status(ex.getStatusCode().value()).body(ex.getReason());
         }
@@ -254,18 +201,7 @@ public class NoteController {
 
         try {
             Note updatedNote = noteService.addTagsToNote(id, request.tagIds(), user);
-            return ResponseEntity.ok(new NoteResponseDTO(
-                            updatedNote.getId(),
-                            updatedNote.getTitle(),
-                            updatedNote.getContent(),
-                            updatedNote.getCreatedAt(),
-                            updatedNote.getUpdatedAt(),
-                            updatedNote.getTags()
-                                    .stream()
-                                    .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
-                                    .toList()
-                    )
-            );
+            return ResponseEntity.ok(NoteMapper.mapToNoteResponseDTO(updatedNote));
         } catch (ResponseStatusException ex) {
             return ResponseEntity
                     .status(ex.getStatusCode().value())
@@ -284,18 +220,7 @@ public class NoteController {
             @PathVariable Long tagId) {
         List<Note> notes = noteService.getNotesByTagId(tagId);
         List<NoteResponseDTO> noteResponses = notes.stream()
-                .map(note -> new NoteResponseDTO(
-                        note.getId(),
-                        note.getTitle(),
-                        note.getContent(),
-                        note.getCreatedAt(),
-                        note.getUpdatedAt(),
-                        note.getTags()
-                                .stream()
-                                .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
-                                .toList()
-                ))
-                .toList();
+                .map(NoteMapper::mapToNoteResponseDTO).toList();
         return ResponseEntity.ok(noteResponses);
     }
 
@@ -309,18 +234,8 @@ public class NoteController {
     public ResponseEntity<List<NoteResponseDTO>> getNotesByTagName(@PathVariable String tagName) {
         List<Note> notes = noteService.getNotesByTagName(tagName);
         List<NoteResponseDTO> noteResponses = notes.stream()
-                .map(note -> new NoteResponseDTO(
-                        note.getId(),
-                        note.getTitle(),
-                        note.getContent(),
-                        note.getCreatedAt(),
-                        note.getUpdatedAt(),
-                        note.getTags()
-                                .stream()
-                                .map(tag -> new TagResponseDTO(tag.getId(), tag.getName()))
-                                .toList()
-                ))
-                .toList();
+                .map(NoteMapper::mapToNoteResponseDTO).toList();
+
         return ResponseEntity.ok(noteResponses);
     }
 
