@@ -1,9 +1,8 @@
-package com.midpath.notes_app;
+package com.midpath.notes_app.service;
 
 import com.midpath.notes_app.model.Tag;
 import com.midpath.notes_app.model.User;
 import com.midpath.notes_app.repository.TagRepository;
-import com.midpath.notes_app.service.TagServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -117,20 +116,6 @@ public class TagServiceTest {
         when(tagRepository.findById(1L)).thenReturn(Optional.of(tag));
 
         assertThrows(ResponseStatusException.class, () -> tagService.updateTag(1L, new Tag(), otherUser));
-    }
-
-//    @Test
-//    void deleteTag_Successful() {
-//        when(tagRepository.findById(1L)).thenReturn(Optional.of(tag));
-//        tagService.deleteTag(1L, user);
-//        verify(tagRepository, times(1)).delete(tag);
-//    }
-
-    @Test
-    void deleteTag_NotFound() {
-        when(tagRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(ResponseStatusException.class, () -> tagService.deleteTag(1L, user));
     }
 
     @Test

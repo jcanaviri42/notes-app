@@ -27,6 +27,10 @@ public class TagController {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Retrieves all the tags.
+     * @return Return all the user tags.
+     */
     @GetMapping
     public ResponseEntity<List<TagResponseDTO>> getAllTags() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -46,6 +50,11 @@ public class TagController {
         );
     }
 
+    /**
+     * Returns a tag by its id.
+     * @param id the tag of a single id.
+     * @return returns a single tag by its id.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<TagResponseDTO> getTagById(@PathVariable Long id) {
         return tagService.getTagById(id)
@@ -54,6 +63,11 @@ public class TagController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found."));
     }
 
+    /**
+     * Creates a new tag for a user.
+     * @param tag the new tag to save.
+     * @return Response entity of created or an error if not.
+     */
     @PostMapping
     public ResponseEntity<?> createTag(@Valid @RequestBody Tag tag) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -76,6 +90,12 @@ public class TagController {
         }
     }
 
+    /**
+     * Updates a tag by its id.
+     * @param id an tag id.
+     * @param updatedTag an object with the fields that the user wants to change.
+     * @return The updated tag.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTag(@PathVariable Long id, @Valid @RequestBody Tag updatedTag) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -94,6 +114,11 @@ public class TagController {
         }
     }
 
+    /**
+     * Deletes a user tag by its id.
+     * @param id an id of a tag.
+     * @return Response entity with no content or an error.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTag(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

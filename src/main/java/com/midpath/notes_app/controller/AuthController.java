@@ -23,6 +23,11 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * This function defines an endpoint that makes the login operation in base a username and a password.
+     * @param request An instant of AuthRequestDTO(username, password).
+     * @return Response entity, user token or an error message.
+     */
     @PostMapping("/login")
     public ResponseEntity<ResponseDTO> login(@RequestBody AuthRequestDTO request) {
         try {
@@ -45,6 +50,11 @@ public class AuthController {
         }
     }
 
+    /**
+     * This function defines an endpoint that registers a new user.
+     * @param request An instant of RegisterUserDTO(username, password, role).
+     * @return Response entity, user token or an error message.
+     */
     @PostMapping("/register")
     public ResponseEntity<ResponseDTO> register(@RequestBody RegisterUserDTO request) {
         try {

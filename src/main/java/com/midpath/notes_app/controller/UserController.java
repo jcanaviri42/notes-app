@@ -23,6 +23,10 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    /**
+     * Returns all the relevant information for the user.
+     * @return the user information for the home page.
+     */
     @GetMapping("/me")
     public ResponseEntity<ResponseDTO> me() {
         try {
@@ -50,7 +54,13 @@ public class UserController {
                                             note.getId(),
                                             note.getTitle(),
                                             note.getContent(),
-                                            note.getTags().stream().map(tag -> new TagResponseDTO(tag.getId(), tag.getName())).toList()))
+                                            note.getCreatedAt(),
+                                            note.getUpdatedAt(),
+                                            note.getTags()
+                                                    .stream()
+                                                    .map(tag -> new TagResponseDTO(
+                                                            tag.getId(),
+                                                            tag.getName())).toList()))
                             .toList(),
                     this.userService.getArchivedNotesByUser(user)
                             .stream()
@@ -59,7 +69,13 @@ public class UserController {
                                             note.getId(),
                                             note.getTitle(),
                                             note.getContent(),
-                                            note.getTags().stream().map(tag -> new TagResponseDTO(tag.getId(), tag.getName())).toList()))
+                                            note.getCreatedAt(),
+                                            note.getUpdatedAt(),
+                                            note.getTags()
+                                                    .stream()
+                                                    .map(tag -> new TagResponseDTO(
+                                                            tag.getId(),
+                                                            tag.getName())).toList()))
                             .toList(),
                     user.getTags().stream()
                             .map(tag -> new TagResponseDTO(

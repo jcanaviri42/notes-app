@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("unused")
 public class UserInfoDetails implements UserDetails {
 
-    private final String username; // Changed from 'name' to 'username' for clarity
+    private final String username;
     private final String password;
     private final List<GrantedAuthority> authorities;
 
