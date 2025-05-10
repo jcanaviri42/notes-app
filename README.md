@@ -156,3 +156,7 @@ JPA Specifications: Used for dynamic and complex search queries.
 
 RESTful Principles: The API follows RESTful principles, using standard HTTP
 methods and status codes.
+
+The app uses gravatar images for the users profiles, here an example of how I used a identicon from gravatar:
+
+https://secure.gravatar.com/avatar/c62e2a4b7d669350d40e5337b79a531e?s=800&d=identicon
